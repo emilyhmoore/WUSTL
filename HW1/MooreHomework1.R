@@ -1,4 +1,4 @@
-setwd("~/WUSTL")
+setwd("~/HW1/WUSTL")
 
 
 ##LOAD IN DEBATE DATA
@@ -18,7 +18,7 @@ plot(x=DebateStatementData$StatementNumber, y=DebateStatementData$POSSTStem/Deba
 ##proportion of negative words in each statement
 plot(x=DebateStatementData$StatementNumber, y=DebateStatementData$NEGSTStem/DebateStatementData$NonStopLength, type="line", col="blue")
 
-##Create datasets that are speaker specific
+##Create datasets that are speaker specific. Just did this for ease of typing.
 OBAMA=DebateStatementData[DebateStatementData$Speaker=="OBAMA:",2:12]
 head(OBAMA)
 LEHRER=DebateStatementData[DebateStatementData$Speaker=="LEHRER:",2:12]
@@ -44,6 +44,20 @@ sum(OBAMA$NonStopLength)
 sum(ROMNEY$NonStopLength)
 sum(LEHRER$NonStopLength)
 
+sum(OBAMA$POSPTStem)
+sum(ROMNEY$POSPTStem)
+sum(LEHRER$POSPTStem)
+
+sum(OBAMA$NEGPTStem)
+sum(ROMNEY$NEGPTStem)
+sum(LEHRER$NEGPTStem)
+
+##overall rates of negative speech/words spoken was almost exactly the same.
+sum(OBAMA$NEGPTStem)/sum(OBAMA$NonStopLength)
+sum(ROMNEY$NEGPTStem)/sum(ROMNEY$NonStopLength)
+sum(LEHRER$NEGPTStem)/sum(LEHRER$NonStopLength)
+
+
 ##Number of Positive Words per statement over time
 plot(OBAMA$POSPTStem, type="l",col="blue")
 lines(LEHRER$POSPTStem, type="l",col="green")
@@ -63,4 +77,33 @@ lines(ROMNEY$POSPTStem/ROMNEY$NonStopLength, type="l",col="red")
 plot(OBAMA$NEGPTStem/OBAMA$NonStopLength, type="l",col="blue")
 lines(LEHRER$NEGPTStem/LEHRER$NonStopLength, type="l",col="green")
 lines(ROMNEY$NEGPTStem/ROMNEY$NonStopLength, type="l",col="red")
+
+head(DebateStatementData)
+
+DebateStatementData$PreviousSpeaker<-"None"
+
+for(i in 1:(nrow(DebateStatementData)-1)){
+  DebateStatementData$PreviousSpeaker[(i+1)]<-DebateStatementData$Speaker[i]
+}
+
+#Lehrer preceded about even positive througuout
+plot(DebateStatementData$NEGPTStem[DebateStatementData$PreviousSpeaker=="LEHRER:"],type="l")
+
+#with Obama, no super clear pattern; a little more positive toward the end
+plot(DebateStatementData$NEGPTStem[DebateStatementData$PreviousSpeaker=="OBAMA:"],type="l")
+
+##when Romeny was the previous speaker toward the end, there were more positive statements.
+plot(DebateStatementData$NEGPTStem[DebateStatementData$PreviousSpeaker=="ROMNEY:"],type="l")
+
+plot(DebateStatementData$NEGPTStem[DebateStatementData$PreviousSpeaker=="OBAMA:"&DebateStatementData$Speaker=="ROMNEY:"],type="l")
+
+
+DebateStatementData$PreviousSpeaker
+
+
+
+
+
+
+
 
