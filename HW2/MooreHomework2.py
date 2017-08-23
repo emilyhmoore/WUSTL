@@ -41,6 +41,7 @@ unigrams={}
 ##did this so as not to confuse with the function
 trigram_count={}
 for release in StatementDictionary:
+	##work on the basic preprocessing
 	statement=StatementDictionary[release]['StatementText']
 	text1 = statement.lower()
 	text2 = re.sub('\W', ' ', text1)
@@ -80,19 +81,22 @@ def BindTuples(tuples):
 stringTrigrams = [BindTuples(tup) for tup in topTrigrams]
 
 
-##I decided to do this different than what's in the answer key. I like the way it writes and I like including the file name and word
+##I decided to do this differently than what's in the answer key. 
+#I like the way it writes and I like including the file name and word
 ##count in the file.
 UnigramDictionary={}
 ##Write the unigrams to a new dictionary
 for release in StatementDictionary:
 	UnigramDictionary[release]={'Author':StatementDictionary[release]["StatementAuthor"],'WordCount':StatementDictionary[release]["numUnigrams"]}
+	##writes a key for each topUnigram
 	for unigram in topUnigrams:
 		UnigramDictionary[release][unigram]=0
+	##checks to see if each unigram in document is in top and updates if it is.
 	for unigram in StatementDictionary[release]["Unigrams"]:
 		if unigram in topUnigrams:
 			UnigramDictionary[release][unigram]=StatementDictionary[release]["Unigrams"][unigram]
 
-
+##write the file
 fields=["FileName", "Author", "WordCount"]+topUnigrams
 with open("Unigrams.csv", "wb") as f:
 	w = csv.DictWriter(f, fields)
@@ -101,16 +105,17 @@ with open("Unigrams.csv", "wb") as f:
 		row = {'FileName': key}
 		row.update(val)
 		w.writerow(row)
-
+		
+##same thing for trigrams
 TrigramDictionary={}
 ##Write the unigrams to a new dictionary
 for release in StatementDictionary:
 	TrigramDictionary[release]={'Author':StatementDictionary[release]["StatementAuthor"],'WordCount':StatementDictionary[release]["numTrigrams"]}
 	for trigram in stringTrigrams:
 		TrigramDictionary[release][trigram]=0
-	#for trigram in StatementDictionary[release]["Trigrams"]:
-	#	if BindTuples(trigram) in stringTrigrams:
-	#		TrigramDictionary[release][BindTuples(trigram)]=StatementDictionary[release]["Trigrams"][trigram]
+	for trigram in StatementDictionary[release]["Trigrams"]:
+		if BindTuples(trigram) in stringTrigrams:
+			TrigramDictionary[release][BindTuples(trigram)]=StatementDictionary[release]["Trigrams"][trigram]
 
 
 fields=["FileName", "Author", "WordCount"]+stringTrigrams
