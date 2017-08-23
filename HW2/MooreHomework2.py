@@ -1,5 +1,3 @@
-from bs4 import BeautifulSoup
-from urllib import urlopen
 import re, os, csv, itertools
 from nltk import word_tokenize
 from nltk import word_tokenize
@@ -40,6 +38,7 @@ for index in range(len(StatementList)):
 	}
 
 unigrams={}
+##did this so as not to confuse with the function
 trigram_count={}
 for release in StatementDictionary:
 	statement=StatementDictionary[release]['StatementText']
@@ -66,50 +65,62 @@ for release in StatementDictionary:
 		count = text5_tri.count(trigram)
 		StatementDictionary[release]["Trigrams"][trigram] = count
 		if trigram in trigram_count:
-			trigram_count[release] += count
+			trigram_count[trigram] += count
 		else:
-			trigram_count[release] = count 
+			trigram_count[trigram] = count 
+
+##found this on stack exchange and is also in answer key			
+topUnigrams = sorted(unigrams, key=unigrams.get, reverse=True)[:1000]
+topTrigrams = sorted(trigram_count, key=trigram_count.get, reverse=True)[:500]
+
+##from the answer key
+def BindTuples(tuples):
+    return ".".join(tuples)
+
+stringTrigrams = [BindTuples(tup) for tup in topTrigrams]
 
 
+##I decided to do this different than what's in the answer key. I like the way it writes and I like including the file name and word
+##count in the file.
+UnigramDictionary={}
+##Write the unigrams to a new dictionary
+for release in StatementDictionary:
+	UnigramDictionary[release]={'Author':StatementDictionary[release]["StatementAuthor"],'WordCount':StatementDictionary[release]["numUnigrams"]}
+	for unigram in topUnigrams:
+		UnigramDictionary[release][unigram]=0
+	for unigram in StatementDictionary[release]["Unigrams"]:
+		if unigram in topUnigrams:
+			UnigramDictionary[release][unigram]=StatementDictionary[release]["Unigrams"][unigram]
 
-##index will be the document number
-##k will be the author
-#press = {}
-#used = []
-#DataDict={}
-#for k in range(len(authors)):
-	##used later for the counting.
-#	for index in range(len(authorlists[k])):
-		##load, convert to lower case, stem, remove stopwords, etc.
-#		statement=authorlists[k][authors[k]+'StatementText']
-		#open("/Users/emilymoore/WUSTL/HW2/SessionsShelby/" + authors[k] + "/" +authorlists[k][index]).read()
-#		text1 = statement.lower()
-#		text2=re.sub('\W', ' ', text1)
-#		text3 = word_tokenize(text2)
-#		text4 = map(pt.stem, text3)
-#		text5 = [x for x in text4 if x not in stop_wordsStem]
-#		text5_tri = trigrams(text5)
-		##need to make this work across texts in each senator's corpus.
-#		for word in text5:
-#			if word in press:
-#				press[word] += 1
-#			if word not in press and word not in used:
-#				press[word] = 1
-#				used.append(word)
-#		DataUnigram.update({"Author":author[k]},press)
-				
-		#with open(authors[k]+"Unigrams.csv", "wb") as f:
-			#w = csv.DictWriter(f, fields)
-			#w.writeheader()
-			#for key,val in sorted(press.items()):
-				#row = {'Statement': key}
-				#row.update(val)
-				#w.writerow(row)
 
-		
-			
-#press_count = press.values()			
-#press_keys = press.keys()
+fields=["FileName", "Author", "WordCount"]+topUnigrams
+with open("Unigrams.csv", "wb") as f:
+	w = csv.DictWriter(f, fields)
+	w.writeheader()
+	for key,val in sorted(UnigramDictionary.items()):
+		row = {'FileName': key}
+		row.update(val)
+		w.writerow(row)
+
+TrigramDictionary={}
+##Write the unigrams to a new dictionary
+for release in StatementDictionary:
+	TrigramDictionary[release]={'Author':StatementDictionary[release]["StatementAuthor"],'WordCount':StatementDictionary[release]["numTrigrams"]}
+	for trigram in stringTrigrams:
+		TrigramDictionary[release][trigram]=0
+	#for trigram in StatementDictionary[release]["Trigrams"]:
+	#	if BindTuples(trigram) in stringTrigrams:
+	#		TrigramDictionary[release][BindTuples(trigram)]=StatementDictionary[release]["Trigrams"][trigram]
+
+
+fields=["FileName", "Author", "WordCount"]+stringTrigrams
+with open("Trigrams.csv", "wb") as f:
+	w = csv.DictWriter(f, fields)
+	w.writeheader()
+	for key,val in sorted(TrigramDictionary.items()):
+		row = {'FileName': key}
+		row.update(val)
+		w.writerow(row)
 
 
 
