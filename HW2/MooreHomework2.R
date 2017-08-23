@@ -32,6 +32,10 @@ SessionsUnigramVar=laply(SessionsUnigrams[,-1],var)
 ShelbyTrigramVar=laply(ShelbyTrigrams[,-1],var)
 SessionsTrigramVar=laply(SessionsTrigrams[,-1],var)
 
+################################################################
+#############Mosteller and Wallace LDA##########################
+################################################################
+
 UnigramWeights<- (ShelbyUnigramMeans - SessionsUnigramMeans) / (ShelbyUnigramVar + SessionsUnigramVar)
 
 #trigrams
@@ -91,10 +95,20 @@ SDdiscrimT<- c(SDmostSessionsT, SDmostShelbyT)
 plot(SDdiscrimU, index, pch="", xlab="weight", ylab="", yaxt="n", main="Most discriminating words\n Standard Mean Difference")
 text(SDdiscrimU, index, label=names(SDdiscrimU), cex=.7)
 
-##not sure why I didn't get the same words on the right as the answer key. 
+##not sure why I didn't get the same words on the right as the answer key. Maybe because of their mistake in the key?
 plot(LDdiscrimT, index, pch="", xlab="weight", xlim=c(-400,1600), ylab="", yaxt="n", main="Most discriminating words\n Linear Discriminant Analysis")
 text(LDdiscrimT, index, label=names(LDdiscrimT), cex=.7)
 
+
+################################################################
+####################Standardized Log Odds#######################
+################################################################
+
+
+
+################################################################
+####################Document Similarity#########################
+################################################################
 
 
 
