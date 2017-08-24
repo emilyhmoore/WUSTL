@@ -109,6 +109,128 @@ text(LDdiscrimT, index, label=names(LDdiscrimT), cex=.7)
 ################################################################
 ####################Document Similarity#########################
 ################################################################
+##sample wasn't working directly for me(samples on the columns instead of the rows for some reason)
+##so instead I just sampled the length of the document and selected from there.
+##I did this for both unigrams and trigrams even though it just asked for trigrams.
+set.seed(85142)
+ShelbyUnigramSampleIndex<-sample(1:nrow(ShelbyUnigrams), size=100, replace=FALSE)
+ShelbyUnigramSample<-ShelbyUnigrams[ShelbyUnigramSampleIndex,]
+
+SessionsUnigramSampleIndex<-sample(1:nrow(SessionsUnigrams), size=100, replace=FALSE)
+SessionsUnigramSample<-SessionsUnigrams[SessionsUnigramSampleIndex,]
+
+ShelbyTrigramSampleIndex<-sample(1:nrow(ShelbyTrigrams), size=100, replace=FALSE)
+ShelbyTrigramSample<-ShelbyTrigrams[ShelbyTrigramSampleIndex,]
+
+SessionsTrigramSampleIndex<-sample(1:nrow(SessionsTrigrams), size=100, replace=FALSE)
+SessionsTrigramSample<-SessionsTrigrams[SessionsTrigramSampleIndex,]
+
+
+ShelbySessionsSampleMatrix<-rbind(ShelbyTrigramSample[,-1], SessionsTrigramSample[,-1])
+rownames(ShelbySessionsSampleMatrix)<-c(ShelbyTrigramSample[,1],SessionsTrigramSample[,1])
+
+ShelbySessionsSampleMatrix<-ShelbySessionsSampleMatrix[,-c(which(colSums(ShelbySessionsSampleMatrix)==0))]
+
+##Not sure I did this right??
+EuclideanDistMatrix<-as.matrix(dist(ShelbySessionsSampleMatrix,method="euclidean"))
+
+ShelbySessionsSampleMatrix
+EuclideanDistMatrix<-as.matrix(EuclideanDistMatrix)
+diag(EuclideanDistMatrix)<- NA
+
+
+#max distance
+which(EuclideanDistMatrix == max(EuclideanDistMatrix, na.rm=T), arr.ind=T)
+
+##LOTS for min distance
+which(EuclideanDistMatrix == min(EuclideanDistMatrix, na.rm=T), arr.ind=T)
+################
+####TF-IDF######
+################
+calcIDF<- function(x){
+  return(log(200/length(which(x>0))))
+}
+
+idf<- apply(ShelbySessionsSampleMatrix, 2, calcIDF)
+
+SampleEIDF<- as.matrix(t(apply(ShelbySessionsSampleMatrix, 1, function(x) x*idf)))
+
+SampleIFIDF<- as.matrix(dist(SampleEIDF, method="euclidean"))
+
+diag(SampleIFIDF)<- NA
+
+##Two Shelby Docs Again
+which(SampleIFIDF == max(SampleIFIDF, na.rm=T), arr.ind=T)
+
+##LOTS for min distance. I don't get it?
+which(SampleIFIDF== min(SampleIFIDF, na.rm=T), arr.ind=T)
+
+##########################
+#####Cosine Similarity####
+##########################
+########################################################################################################
+####Honestly, I had no time to do anything but copy this part##########################################
+##########I was worried I would never get to the other homeworks.#################
+########################################################################################################
+
+cs<- matrix(nrow=200, ncol=200)
+cosineSim<- function(x, y){
+  return( sum(x*y)/ sqrt( sum(x^2)* sum(y^2)))
+}
+
+#this thing takes forever on my computer
+for (m in 1:nrow(ShelbySessionsSampleMatrix)){
+  for (n in 1:nrow(ShelbySessionsSampleMatrix)){
+    a<- cosineSim(ShelbySessionsSampleMatrix[m,], ShelbySessionsSampleMatrix[n,])
+    cs[m, n]<- a
+    cs[n, m]<- a
+  }
+}
+m<-NULL
+n<-NULL
+
+diag(cs)<-NA
+
+
+csWithTfidf<- matrix(nrow=200, ncol=200)
+
+for (m in 1:nrow(SampleEIDF)){
+  for (n in 1:nrow(SampleEIDF)){
+    a <- cosineSim(SampleEIDF[m,], SampleEIDF[n,])
+    csWithTfidf[m, n]<- a
+    csWithTfidf[n, m]<- a
+  }
+}
+
+diag(csWithTfidf)<- NA
+
+
+
+normed<-ShelbySessionsSampleMatrix
+for (i in 1:nrow(ShelbySessionsSampleMatrix)){
+  normed[i,]<- ShelbySessionsSampleMatrix[i,]/sum(ShelbySessionsSampleMatrix[i,])
+}
+
+#choose sigma
+sigma = 100
+gauss<- exp(-(as.matrix(dist(normed)))/sigma)
+
+diag(gauss)<- NA
+
+gauss
+
+idf<- apply(normed, 2, calcIDF)
+normed_idf<- as.matrix(t(apply(normed, 1, function(x) x*idf)))
+gaussNorm<- exp(-(as.matrix(dist(normed_idf)))/sigma)
+write.csv(gaussNorm, "gaussNorm.csv")
+
+diag(gaussNorm)<- NA
+
+gaussNorm
+
+
+
+
 
 
 
